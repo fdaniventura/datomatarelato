@@ -34,12 +34,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Datos locales del proyecto
-data/json/*.json
-data/db/*.db
-data/db/*.db-*
-
-# Archivos de respaldo temporales
-*.backup.*
-/tmp/

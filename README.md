@@ -1,115 +1,38 @@
-# Datomatarelato
+# datomatarelato
+Recopilador de datos de actividades cruzado con ánimo
 
-**Recopilador de datos de actividades cruzado con ánimo**
+## Getting Started
 
-Aplicación web desarrollada con Next.js para el seguimiento diario de actividades y estados de ánimo, con análisis de datos y visualización de estadísticas.
-
-## 🚀 Características
-
-- **Formulario Diario**: Registra tus actividades, estado de ánimo y notas del día
-- **Almacenamiento Dual**: 
-  - Archivos JSON intermedios para respaldo y auditoría
-  - Base de datos SQLite para consultas estructuradas y relacionales
-- **Panel de Control**: Vista general de tus registros y estadísticas
-- **Visualización de Datos**: (En desarrollo) Gráficos y análisis de tendencias
-
-## 🛠️ Tecnologías
-
-- **Framework**: Next.js 14 (App Router)
-- **Lenguaje**: TypeScript
-- **Estilos**: Tailwind CSS
-- **Base de Datos**: SQLite (better-sqlite3)
-- **Formularios**: React Hook Form + Zod
-- **Iconos**: Lucide React
-- **Gráficos**: Recharts (para estadísticas futuras)
-
-## 📦 Instalación y Uso
+First, run the development server:
 
 ```bash
-# Instalar dependencias (ya realizado)
-npm install
-
-# Iniciar servidor de desarrollo
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-La aplicación estará disponible en `http://localhost:3000`
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 📁 Estructura del Proyecto
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```
-datomatarelato/
-├── app/                      # Rutas de Next.js (App Router)
-│   ├── api/                  # API Routes
-│   │   └── daily-entry/      # Endpoints para entradas diarias
-│   ├── daily-form/           # Página del formulario diario
-│   ├── entries/              # Página de visualización de entradas
-│   └── page.tsx              # Página principal (Dashboard)
-├── components/               # Componentes React
-│   ├── dashboard/            # Componentes del panel de control
-│   └── forms/                # Formularios
-├── lib/                      # Lógica de negocio
-│   ├── db/                   # Configuración de base de datos
-│   │   ├── schema.sql        # Esquema SQL
-│   │   └── database.ts       # Funciones de BD
-│   └── json-handler.ts       # Manejo de archivos JSON
-├── data/                     # Datos generados
-│   ├── json/                 # Archivos JSON de respaldo
-│   └── db/                   # Base de datos SQLite
-└── public/                   # Archivos estáticos
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## 🗄️ Modelo de Datos
+## Learn More
 
-### Base de Datos SQLite
+To learn more about Next.js, take a look at the following resources:
 
-- **daily_entries**: Registros diarios principales
-- **activities**: Catálogo de actividades
-- **entry_activities**: Relación entre entradas y actividades
-- **custom_metrics**: Métricas personalizadas
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-### JSON Intermedio
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-Cada entrada diaria se guarda primero como JSON con estructura:
-```json
-{
-  "date": "2025-11-15",
-  "moodScore": 7,
-  "activities": [...],
-  "customMetrics": [...],
-  "notes": "...",
-  "timestamp": "2025-11-15T14:30:00Z"
-}
-```
+## Deploy on Vercel
 
-## 🎯 Uso
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-1. **Registro Diario**: Accede al formulario desde el dashboard o `/daily-form`
-2. **Ver Entradas**: Consulta tus registros en `/entries`
-3. **Estadísticas**: (Próximamente) Visualiza tendencias y análisis
-
-## 🔧 Scripts Disponibles
-
-```bash
-npm run dev      # Servidor de desarrollo
-npm run build    # Build de producción
-npm start        # Iniciar en producción
-npm run lint     # Linting del código
-```
-
-## 📝 Roadmap
-
-- [x] Configuración inicial del proyecto
-- [x] Formulario diario básico
-- [x] Almacenamiento en JSON y SQLite
-- [x] Panel de control
-- [x] Visualización de entradas
-- [ ] Estadísticas y gráficos
-- [ ] Análisis de correlaciones (ánimo vs actividades)
-- [ ] Exportación de datos
-- [ ] Filtros y búsqueda avanzada
-
-## 👤 Autor
-
-[@fdaniventura](https://github.com/fdaniventura)
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
