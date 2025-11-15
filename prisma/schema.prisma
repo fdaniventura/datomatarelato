@@ -1,0 +1,221 @@
+// Prisma Schema para Datomatarelato
+// Estructura de datos para tracking de actividades y estado de ánimo
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// SISTEMA DE MOODS
+// ============================================
+
+model Mood {
+  id    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  emoji String  @unique @db.VarChar(20)
+  name  String? @db.VarChar(100)
+  level Int     @db.SmallInt
+
+  // Relaciones
+  workFragments  WorkFragment[]
+  tasks          Task[]
+  events         Event[]
+  journalEntries JournalEntry[]
+
+  @@map("moods")
+}
+
+// ============================================
+// TRABAJO Y FRAGMENTOS
+// ============================================
+
+model WorkDayStats {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date         DateTime @unique @db.Date
+  workedTime   Int      @default(0) @map("worked_time")
+  mngmtTime    Int      @default(0) @map("mngmt_time")
+  satisfaction Int?     @db.SmallInt
+  kaosTime     Int      @default(0) @map("kaos_time")
+
+  // Relaciones 1:N
+  fragments WorkFragment[]
+
+  @@index([date])
+  @@map("work_day_stats")
+}
+
+model WorkFragment {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  startTime DateTime  @map("start_time") @db.Timestamp(0)
+  endTime   DateTime? @map("end_time") @db.Timestamp(0)
+  duration  Int
+  ticket    String?   @db.Char(6)
+  isKaos    Boolean   @default(false) @map("is_kaos")
+
+  // Foreign Keys
+  workDayId String  @map("work_day") @db.Uuid
+  moodId    String? @map("mood") @db.Uuid
+
+  // Relaciones
+  workDay WorkDayStats @relation(fields: [workDayId], references: [id], onDelete: Cascade)
+  mood    Mood?        @relation(fields: [moodId], references: [id], onDelete: Restrict)
+
+  @@index([workDayId], name: "work_fragments_work_day_index")
+  @@index([moodId], name: "work_fragments_mood_index")
+  @@index([startTime], name: "work_fragments_start_time_index")
+  @@map("work_fragments")
+}
+
+// ============================================
+// TAREAS Y PROYECTOS
+// ============================================
+
+model TaskTemplate {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String  @unique @db.VarChar(100)
+  desc       String? @db.Text
+  daysLapsus BigInt? @map("days_lapsus")
+  recurrent  Boolean @default(false)
+
+  // Relaciones
+  tasks Task[]
+
+  @@map("task_templates")
+}
+
+model Task {
+  id       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name     String    @db.VarChar(100)
+  doneDate DateTime? @map("done_date") @db.Date
+  todoDate DateTime? @map("todo_date") @db.Date
+  done     Boolean   @default(false)
+
+  // Foreign Keys
+  taskTemplateId String  @map("task_template") @db.Uuid
+  moodId         String? @map("mood") @db.Uuid
+  projectId      String? @map("project") @db.Uuid
+
+  // Relaciones
+  taskTemplate TaskTemplate @relation(fields: [taskTemplateId], references: [id], onDelete: Restrict)
+  mood         Mood?        @relation(fields: [moodId], references: [id], onDelete: SetNull)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([done], name: "tasks_done_index")
+  @@index([moodId], name: "tasks_mood_index")
+  @@index([taskTemplateId], name: "tasks_task_template_index")
+  @@index([projectId], name: "tasks_project_index")
+  @@index([doneDate], name: "tasks_done_date_index")
+  @@index([todoDate], name: "tasks_todo_date_index")
+  @@map("tasks")
+}
+
+model ProjectTag {
+  id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  emoji String @db.VarChar(20)
+  name  String @db.VarChar(100)
+
+  // Relaciones
+  projects Project[]
+
+  @@map("project_tags")
+}
+
+model Project {
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String @db.VarChar(255)
+  desc String @db.Text
+
+  // Foreign Keys
+  tagId String? @map("tag") @db.Uuid
+
+  // Relaciones
+  tag   ProjectTag? @relation(fields: [tagId], references: [id], onDelete: SetNull)
+  tasks Task[]
+
+  @@index([tagId], name: "project_tag_index")
+  @@map("project")
+}
+
+// ============================================
+// CONTADORES Y EVENTOS
+// ============================================
+
+model Counter {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  emoji           String  @db.VarChar(20)
+  name            String? @db.VarChar(100)
+  threshold       Int?    @db.SmallInt
+  exceedingIsGood Boolean @default(false) @map("exceeding_is_good")
+
+  // Relaciones
+  counterTimes CounterTime[]
+
+  @@map("counters")
+}
+
+model Event {
+  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date    DateTime @db.Date
+  annual  Boolean  @default(false)
+
+  // Foreign Keys
+  moodId String @map("mood") @db.Uuid
+
+  // Relaciones
+  mood Mood @relation(fields: [moodId], references: [id], onDelete: Restrict)
+
+  @@index([date], name: "events_date_index")
+  @@index([moodId], name: "events_mood_index")
+  @@map("events")
+}
+
+// ============================================
+// ESTADÍSTICAS Y DIARIO
+// ============================================
+
+model DayStats {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date           DateTime @unique @db.Date
+  totalTasksDone Int?     @map("total_tasks_done")
+  averageMood    Decimal? @map("average_mood") @db.Decimal(3, 2)
+  totalEvents    BigInt   @map("total_events")
+
+  @@map("day_stats")
+}
+
+model JournalEntry {
+  id   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date DateTime @db.Date
+  note String?  @db.Text
+
+  // Foreign Keys
+  moodId String @map("mood") @db.Uuid
+
+  // Relaciones
+  mood Mood @relation(fields: [moodId], references: [id], onDelete: Restrict)
+
+  @@index([date], name: "journal_entry_date_index")
+  @@index([moodId], name: "journal_entry_mood_index")
+  @@map("journal_entry")
+}
+
+model CounterTime {
+  id    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date  DateTime @db.Date
+  times Int      @db.SmallInt
+
+  // Foreign Keys
+  counterId String @map("counter") @db.Uuid
+
+  // Relaciones
+  counter Counter @relation(fields: [counterId], references: [id], onDelete: Restrict)
+
+  @@index([counterId], name: "counter_times_counter_index")
+  @@index([date], name: "counter_times_date_index")
+  @@index([date, counterId], name: "counter_times_date_counter_index")
+  @@map("counter_times")
+}
